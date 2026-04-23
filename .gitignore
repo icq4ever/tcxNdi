@@ -9,6 +9,9 @@ build/
 build-*/
 bin/
 
+# trusscli auto-generates CMakePresets.json per host (machine-specific)
+CMakePresets.json
+
 # IDE / OS junk
 .DS_Store
 .vscode/
