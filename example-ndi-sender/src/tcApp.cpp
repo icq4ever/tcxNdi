@@ -30,6 +30,14 @@ void tcApp::draw() {
         }
     }
 
+    // Mouse-follow dot — easy visual check for end-to-end latency when
+    // viewing this sender on a receiver.
+    pushMatrix();
+    translate(getMouseX(), getMouseY());
+    setColor(1.0f, 0.f, 0.f);
+    drawCircle(0, 0, 50);
+    popMatrix();
+
     // HUD
     setColor(1.0f);
     drawBitmapString(std::string("NDI: ") + sender_.getName(), 12, 20);
