@@ -36,28 +36,50 @@ C:\Program Files\NDI\NDI 6 SDK\Lib\x64\
 
 ### Linux
 
-Run the SDK installer script. Default install location:
+NDI on Linux relies on the **avahi-daemon** (mDNS service) for network discovery — without it other machines cannot find your sender. Pick the subsection that matches your distro.
+
+#### Debian / Ubuntu / Raspbian
+
+Download the SDK installer from https://ndi.video/sdk/ (fill the form, a download link arrives by email). Extract and run it:
 
 ```
-/usr/include/ndi/
-/usr/lib/x86_64-linux-gnu/libndi.so.*       # x86_64
-/usr/lib/aarch64-linux-gnu/libndi.so.*      # arm64 (Raspberry Pi etc.)
+tar xf Install_NDI_SDK_v6_Linux.tar.gz
+./Install_NDI_SDK_v6_Linux.sh    # press Y to accept the EULA
 ```
 
-NDI on Linux relies on the **avahi-daemon** (mDNS service) for network discovery — without it other machines cannot find your sender. Make sure it is installed and running:
+The installer unpacks into `~/NDI SDK for Linux/`. Copy headers and libraries to system-wide locations so the addon's CMake probe finds them:
 
 ```
-sudo apt install avahi-daemon libnss-mdns       # Debian / Raspbian
-sudo pacman -S avahi nss-mdns                    # Arch
+# x86_64 (Ubuntu on a PC)
+sudo cp -r "$HOME/NDI SDK for Linux/include/"* /usr/include/
+sudo cp -r "$HOME/NDI SDK for Linux/lib/x86_64-linux-gnu/"* /usr/lib/x86_64-linux-gnu/
+sudo ldconfig
+```
+
+```
+# aarch64 (Raspberry Pi 4 / 5, 64-bit Raspbian)
+sudo cp -r "$HOME/NDI SDK for Linux/include/"* /usr/include/
+sudo cp -r "$HOME/NDI SDK for Linux/lib/aarch64-linux-gnu/"* /usr/lib/aarch64-linux-gnu/
+sudo ldconfig
+```
+
+Then install avahi:
+
+```
+sudo apt install avahi-daemon libnss-mdns
 sudo systemctl enable --now avahi-daemon
 ```
 
+**Raspberry Pi note:** NDI SDK 6 is arm64-only. Raspbian must be the 64-bit build (`uname -m` should print `aarch64`). Pi Zero and Pi 1–3 running 32-bit OS are not supported.
+
 #### Arch Linux (and EndeavourOS / Manjaro)
 
-Install the SDK from the AUR:
+Install the SDK from the AUR, then avahi:
 
 ```
 yay -S ndi-sdk
+sudo pacman -S avahi nss-mdns
+sudo systemctl enable --now avahi-daemon
 ```
 
 If receivers on other machines can't find the sender or see the name but never get frames, see [Troubleshooting](#troubleshooting).
