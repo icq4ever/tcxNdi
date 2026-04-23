@@ -26,7 +26,10 @@ bool NdiSender::setup(const std::string& name) {
 
     NDIlib_send_create_t desc{};
     desc.p_ndi_name = name.c_str();
-    desc.clock_video = false;   // app drives the cadence
+    // Let NDI pace delivery to the declared frame rate. With clock_video=false
+    // the Windows NDI Tools viewer would freeze on the first frame (frames
+    // sent but receiver couldn't schedule them).
+    desc.clock_video = true;
 
     NDIlib_send_instance_t s = NDIlib_send_create(&desc);
     if (!s) {
