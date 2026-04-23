@@ -1,6 +1,7 @@
 #include "tcxNdiFinder.h"
 #include "tcxNdiInit.h"
 
+#include <cstddef>   // NDI SDK on Arch needs NULL via this
 #include <Processing.NDI.Lib.h>
 
 namespace tcx {

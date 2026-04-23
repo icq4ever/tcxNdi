@@ -1,6 +1,11 @@
 #include "tcxNdiInit.h"
 
+// Some NDI SDK distributions (notably the Arch AUR `ndi-sdk` package) ship
+// headers that use NULL without including <cstddef>. Pull it in first so
+// the SDK headers parse cleanly across distros.
+#include <cstddef>
 #include <Processing.NDI.Lib.h>
+
 #include <atomic>
 #include <cstdlib>
 #include <mutex>

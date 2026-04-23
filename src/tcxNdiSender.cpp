@@ -1,6 +1,7 @@
 #include "tcxNdiSender.h"
 #include "tcxNdiInit.h"
 
+#include <cstddef>   // some NDI SDK headers (e.g. Arch AUR) need NULL via this
 #include <Processing.NDI.Lib.h>
 
 #include "tc/utils/tcLog.h"

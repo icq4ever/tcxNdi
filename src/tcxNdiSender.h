@@ -1,5 +1,10 @@
 #pragma once
 
+// tcPixels.h uses Color and memcpy without including their headers itself
+// (it expects to be pulled in after TrussC.h). Bring those in first so the
+// addon can include tcPixels.h directly.
+#include <cstring>
+#include "tcColor.h"
 #include "tc/graphics/tcPixels.h"
 
 #include <string>

@@ -1,8 +1,9 @@
 #include "tcxNdiReceiver.h"
 #include "tcxNdiInit.h"
 
-#include <Processing.NDI.Lib.h>
+#include <cstddef>   // NDI SDK on Arch needs NULL via this
 #include <cstring>
+#include <Processing.NDI.Lib.h>
 
 #include "tc/utils/tcLog.h"
 
