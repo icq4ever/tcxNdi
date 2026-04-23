@@ -2,8 +2,7 @@
 
 NDI (Network Device Interface) send/receive addon for TrussC.
 
-NDI is a low-latency video-over-IP protocol from Vizrt (formerly NewTek),
-widely used in broadcast, AV installations, and live streaming.
+NDI is a low-latency video-over-IP protocol from Vizrt (formerly NewTek), widely used in broadcast, AV installations, and live streaming.
 
 ## Features
 
@@ -13,8 +12,7 @@ widely used in broadcast, AV installations, and live streaming.
 
 ## Installing the NDI SDK
 
-The NDI SDK is **not redistributable**, so you must install it yourself.
-Download from https://ndi.video/sdk/ (free, registration required).
+The NDI SDK is **not redistributable**, so you must install it yourself. Download from https://ndi.video/sdk/ (free, registration required).
 
 ### macOS
 
@@ -46,9 +44,7 @@ Run the SDK installer script. Default install location:
 /usr/lib/aarch64-linux-gnu/libndi.so.*      # arm64 (Raspberry Pi etc.)
 ```
 
-NDI on Linux relies on the **avahi-daemon** (mDNS service) for network
-discovery — without it other machines cannot find your sender. Make
-sure it is installed and running:
+NDI on Linux relies on the **avahi-daemon** (mDNS service) for network discovery — without it other machines cannot find your sender. Make sure it is installed and running:
 
 ```
 sudo apt install avahi-daemon libnss-mdns       # Debian / Raspbian
@@ -64,8 +60,7 @@ Install the SDK from the AUR:
 yay -S ndi-sdk
 ```
 
-**Arch-specific gotcha — avahi vs systemd-resolved conflict.** Arch ships with `systemd-resolved` enabled, and by default it also binds UDP 5353 for its own mDNS stack. When you additionally install `avahi`, both daemons try to share the port and `avahi` ends up publishing only on `lo` — so other machines on your network can't find the sender even
-though it looks fine locally.
+**Arch-specific gotcha — avahi vs systemd-resolved conflict.** Arch ships with `systemd-resolved` enabled, and by default it also binds UDP 5353 for its own mDNS stack. When you additionally install `avahi`, both daemons try to share the port and `avahi` ends up publishing only on `lo` — so other machines on your network can't find the sender even though it looks fine locally.
 
 Fix by telling `systemd-resolved` to leave mDNS to `avahi`:
 
@@ -86,8 +81,7 @@ Verify only `avahi-daemon` is on UDP 5353 afterwards:
 sudo ss -tulnp | grep 5353
 ```
 
-Then restart the sender and confirm it advertises on your LAN interface
-(not just `lo`):
+Then restart the sender and confirm it advertises on your LAN interface (not just `lo`):
 
 ```
 avahi-browse _ndi._tcp -r -t
@@ -148,8 +142,7 @@ void tcApp::draw() {
 }
 ```
 
-See `examples/ndiSenderExample/` and `examples/ndiReceiverExample/` for
-runnable samples.
+See `examples/ndiSenderExample/` and `examples/ndiReceiverExample/` for runnable samples.
 
 ## Credits
 
