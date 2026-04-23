@@ -26,10 +26,7 @@ bool NdiSender::setup(const std::string& name) {
 
     NDIlib_send_create_t desc{};
     desc.p_ndi_name = name.c_str();
-    // Let NDI pace delivery to the declared frame rate. With clock_video=false
-    // the Windows NDI Tools viewer would freeze on the first frame (frames
-    // sent but receiver couldn't schedule them).
-    desc.clock_video = true;
+    desc.clock_video = false;   // app drives the cadence
 
     NDIlib_send_instance_t s = NDIlib_send_create(&desc);
     if (!s) {
@@ -59,12 +56,8 @@ bool NdiSender::send(const trussc::Pixels& pixels) {
     int stride;
     switch (pixels.getChannels()) {
         case 4:
-            // Tag as RGBX rather than RGBA. TrussC framebuffers are typically
-            // cleared with alpha=0, which a RGBA-aware receiver would treat
-            // as "fully transparent" and composite as black (observed on the
-            // Windows NDI Tools viewer). RGBX tells the receiver to ignore
-            // the 4th byte and treat the frame as opaque.
-            fourcc = NDIlib_FourCC_type_RGBX;
+            // tc::Pixels stores RGBA; NDI accepts RGBA directly (NDIlib v5+).
+            fourcc = NDIlib_FourCC_type_RGBA;
             stride = pixels.getWidth() * 4;
             break;
         case 3:
@@ -88,16 +81,6 @@ bool NdiSender::send(const trussc::Pixels& pixels) {
     frame.FourCC = fourcc;
     frame.line_stride_in_bytes = stride;
     frame.p_data = const_cast<uint8_t*>(pixels.getData());
-    // NDI uses frame_rate_N / frame_rate_D as the declared cadence for
-    // receivers. Value-initialised structs have both zero, which some
-    // receivers (e.g. the Windows NDI Tools viewer) treat as "unknown"
-    // and end up freezing on the first frame. Declare a sensible default
-    // of 60 fps — senders with a different cadence can still push at
-    // their own rate; this is just metadata.
-    frame.frame_rate_N = 60000;
-    frame.frame_rate_D = 1000;
-    frame.picture_aspect_ratio = (float)frame.xres / (float)frame.yres;
-    frame.frame_format_type    = NDIlib_frame_format_type_progressive;
 
     NDIlib_send_send_video_v2(cast(impl_), &frame);
     return true;

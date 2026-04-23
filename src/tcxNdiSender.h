@@ -39,8 +39,8 @@ public:
     /// Tear down the NDI source explicitly. Also called from the destructor.
     void close();
 
-    /// Push a frame to the network. Pixels must be U8; channel count
-    /// determines the format (4 → BGRA/RGBA, 3 → RGB packed, others rejected).
+    /// Push a frame to the network. Pixels must be U8 RGBA data.
+    /// Three-channel RGB is rejected because NDI has no packed RGB FourCC.
     /// Returns false on invalid input or when the sender is not setup.
     bool send(const trussc::Pixels& pixels);
 
