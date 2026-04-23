@@ -142,7 +142,7 @@ void tcApp::draw() {
 }
 ```
 
-See `examples/ndiSenderExample/` and `examples/ndiReceiverExample/` for runnable samples.
+See `example-ndi-sender/` and `example-ndi-receiver/` for runnable samples.
 
 ## Credits
 
