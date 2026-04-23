@@ -52,7 +52,7 @@ sudo pacman -S avahi nss-mdns                    # Arch
 sudo systemctl enable --now avahi-daemon
 ```
 
-#### Arch Linux
+#### Arch Linux (and EndeavourOS / Manjaro)
 
 Install the SDK from the AUR:
 
@@ -60,9 +60,18 @@ Install the SDK from the AUR:
 yay -S ndi-sdk
 ```
 
-**Arch-specific gotcha — avahi vs systemd-resolved conflict.** Arch ships with `systemd-resolved` enabled, and by default it also binds UDP 5353 for its own mDNS stack. When you additionally install `avahi`, both daemons try to share the port and `avahi` ends up publishing only on `lo` — so other machines on your network can't find the sender even though it looks fine locally.
+Arch-based distros usually need two extra tweaks before NDI works on the LAN. The symptom is "receivers see the source name but never get frames" — discovery is fine, the TCP video stream is being blocked or misrouted.
 
-Fix by telling `systemd-resolved` to leave mDNS to `avahi`:
+**1. Open NDI's ports in `firewalld`** (EndeavourOS ships it enabled by default). Skip this if `systemctl is-active firewalld` says `inactive`.
+
+```
+sudo firewall-cmd --zone=public --add-port=5353/udp --permanent
+sudo firewall-cmd --zone=public --add-port=5960-5990/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=5960-5990/udp --permanent
+sudo firewall-cmd --reload
+```
+
+**2. Let `avahi` own UDP 5353** — plain Arch has `systemd-resolved` bound to the same port, which causes avahi to publish only on `lo`.
 
 ```
 sudo mkdir -p /etc/systemd/resolved.conf.d
@@ -70,22 +79,27 @@ sudo tee /etc/systemd/resolved.conf.d/no-mdns.conf > /dev/null <<'EOF'
 [Resolve]
 MulticastDNS=no
 EOF
-
-sudo systemctl restart systemd-resolved
-sudo systemctl restart avahi-daemon
+sudo systemctl restart systemd-resolved avahi-daemon
 ```
 
-Verify only `avahi-daemon` is on UDP 5353 afterwards:
-
-```
-sudo ss -tulnp | grep 5353
-```
-
-Then restart the sender and confirm it advertises on your LAN interface (not just `lo`):
+Confirm that discovery now advertises on your LAN NIC (not just `lo`):
 
 ```
 avahi-browse _ndi._tcp -r -t
 ```
+
+**Still not working?** On multi-NIC machines (Tailscale, Docker, VPNs) pin NDI to the LAN IP in `~/.ndi/ndi-config.v1.json`:
+
+```
+{
+  "ndi": {
+    "adapters":  { "allowed": ["192.168.x.x"] },
+    "multicast": { "send": { "enable": false } }
+  }
+}
+```
+
+Restart the sender after editing — the NDI runtime reads this config at init.
 
 
 ## Usage
