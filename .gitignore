@@ -3,3 +3,14 @@
 # is just a courtesy.
 libs/
 ndi-sdk/
+
+# Build artifacts from compiling the bundled examples
+build/
+build-*/
+bin/
+
+# IDE / OS junk
+.DS_Store
+.vscode/
+.idea/
+*.xcodeproj/
