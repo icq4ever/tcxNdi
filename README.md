@@ -60,46 +60,7 @@ Install the SDK from the AUR:
 yay -S ndi-sdk
 ```
 
-Arch-based distros usually need two extra tweaks before NDI works on the LAN. The symptom is "receivers see the source name but never get frames" — discovery is fine, the TCP video stream is being blocked or misrouted.
-
-**1. Open NDI's ports in `firewalld`** (EndeavourOS ships it enabled by default). Skip this if `systemctl is-active firewalld` says `inactive`.
-
-```
-sudo firewall-cmd --zone=public --add-port=5353/udp --permanent
-sudo firewall-cmd --zone=public --add-port=5960-5990/tcp --permanent
-sudo firewall-cmd --zone=public --add-port=5960-5990/udp --permanent
-sudo firewall-cmd --reload
-```
-
-**2. Let `avahi` own UDP 5353** — plain Arch has `systemd-resolved` bound to the same port, which causes avahi to publish only on `lo`.
-
-```
-sudo mkdir -p /etc/systemd/resolved.conf.d
-sudo tee /etc/systemd/resolved.conf.d/no-mdns.conf > /dev/null <<'EOF'
-[Resolve]
-MulticastDNS=no
-EOF
-sudo systemctl restart systemd-resolved avahi-daemon
-```
-
-Confirm that discovery now advertises on your LAN NIC (not just `lo`):
-
-```
-avahi-browse _ndi._tcp -r -t
-```
-
-**Still not working?** On multi-NIC machines (Tailscale, Docker, VPNs) pin NDI to the LAN IP in `~/.ndi/ndi-config.v1.json`:
-
-```
-{
-  "ndi": {
-    "adapters":  { "allowed": ["192.168.x.x"] },
-    "multicast": { "send": { "enable": false } }
-  }
-}
-```
-
-Restart the sender after editing — the NDI runtime reads this config at init.
+If receivers on other machines can't find the sender or see the name but never get frames, see [Troubleshooting](#troubleshooting).
 
 
 ## Usage
@@ -157,6 +118,59 @@ void tcApp::draw() {
 ```
 
 See `example-ndi-sender/` and `example-ndi-receiver/` for runnable samples.
+
+## Troubleshooting
+
+### Linux: receivers see the source name but no frames arrive
+
+Discovery is fine but the TCP video stream is being blocked or advertised on the wrong interface.
+
+**1. Open NDI's ports in `firewalld`.** EndeavourOS ships it enabled by default; skip if `systemctl is-active firewalld` says `inactive`.
+
+```
+sudo firewall-cmd --zone=public --add-port=5353/udp --permanent
+sudo firewall-cmd --zone=public --add-port=5960-5990/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=5960-5990/udp --permanent
+sudo firewall-cmd --reload
+```
+
+**2. Multi-NIC machines (Tailscale, Docker, VPNs)** — pin NDI to the LAN IP in `~/.ndi/ndi-config.v1.json`. Restart the sender after editing; the NDI runtime reads this config at init.
+
+```
+{
+  "ndi": {
+    "adapters":  { "allowed": ["192.168.x.x"] },
+    "multicast": { "send": { "enable": false } }
+  }
+}
+```
+
+### Linux: sender only visible on the local machine (plain Arch)
+
+Arch ships `systemd-resolved` bound to UDP 5353, the same port `avahi` needs for mDNS. When both run, avahi ends up publishing only on `lo` and other machines can't see the source. Hand 5353 to avahi:
+
+```
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo tee /etc/systemd/resolved.conf.d/no-mdns.conf > /dev/null <<'EOF'
+[Resolve]
+MulticastDNS=no
+EOF
+sudo systemctl restart systemd-resolved avahi-daemon
+```
+
+Confirm the source now advertises on your LAN NIC (not just `lo`):
+
+```
+avahi-browse _ndi._tcp -r -t
+```
+
+## Tested
+
+- [x] Linux (EndeavourOS / Arch)
+- [ ] Linux (Ubuntu / Debian)
+- [ ] Linux (Raspbian)
+- [ ] Windows
+- [ ] macOS
 
 ## Credits
 
