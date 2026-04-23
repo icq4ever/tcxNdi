@@ -85,6 +85,16 @@ bool NdiSender::send(const trussc::Pixels& pixels) {
     frame.FourCC = fourcc;
     frame.line_stride_in_bytes = stride;
     frame.p_data = const_cast<uint8_t*>(pixels.getData());
+    // NDI uses frame_rate_N / frame_rate_D as the declared cadence for
+    // receivers. Value-initialised structs have both zero, which some
+    // receivers (e.g. the Windows NDI Tools viewer) treat as "unknown"
+    // and end up freezing on the first frame. Declare a sensible default
+    // of 60 fps — senders with a different cadence can still push at
+    // their own rate; this is just metadata.
+    frame.frame_rate_N = 60000;
+    frame.frame_rate_D = 1000;
+    frame.picture_aspect_ratio = (float)frame.xres / (float)frame.yres;
+    frame.frame_format_type    = NDIlib_frame_format_type_progressive;
 
     NDIlib_send_send_video_v2(cast(impl_), &frame);
     return true;
