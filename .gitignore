@@ -1,0 +1,5 @@
+# Local NDI SDK drop (if a user copies the SDK in here instead of installing
+# it system-wide). The addon's CMakeLists also accepts NDI_SDK_ROOT so this
+# is just a courtesy.
+libs/
+ndi-sdk/

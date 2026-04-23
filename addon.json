@@ -1,0 +1,6 @@
+{
+  "description": "NDI (Network Device Interface) video send/receive over network",
+  "author": "icq4ever",
+  "license": "MIT",
+  "keywords": ["ndi", "network", "video", "streaming", "broadcast"]
+}
