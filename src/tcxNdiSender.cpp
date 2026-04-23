@@ -56,8 +56,12 @@ bool NdiSender::send(const trussc::Pixels& pixels) {
     int stride;
     switch (pixels.getChannels()) {
         case 4:
-            // tc::Pixels stores RGBA; NDI accepts RGBA directly (NDIlib v5+).
-            fourcc = NDIlib_FourCC_type_RGBA;
+            // Tag as RGBX rather than RGBA. TrussC framebuffers are typically
+            // cleared with alpha=0, which a RGBA-aware receiver would treat
+            // as "fully transparent" and composite as black (observed on the
+            // Windows NDI Tools viewer). RGBX tells the receiver to ignore
+            // the 4th byte and treat the frame as opaque.
+            fourcc = NDIlib_FourCC_type_RGBX;
             stride = pixels.getWidth() * 4;
             break;
         case 3:

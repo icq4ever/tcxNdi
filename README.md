@@ -44,15 +44,53 @@ Run the SDK installer script. Default install location:
 /usr/include/ndi/
 /usr/lib/x86_64-linux-gnu/libndi.so.*       # x86_64
 /usr/lib/aarch64-linux-gnu/libndi.so.*      # arm64 (Raspberry Pi etc.)
+```
 
+NDI on Linux relies on the **avahi-daemon** (mDNS service) for network
+discovery — without it other machines cannot find your sender. Make
+sure it is installed and running:
+
+```
+sudo apt install avahi-daemon libnss-mdns       # Debian / Raspbian
+sudo pacman -S avahi nss-mdns                    # Arch
+sudo systemctl enable --now avahi-daemon
 ```
 
 #### Arch Linux
 
-install with AUR package
+Install the SDK from the AUR:
 
 ```
-yay ndi-sdk
+yay -S ndi-sdk
+```
+
+**Arch-specific gotcha — avahi vs systemd-resolved conflict.** Arch ships with `systemd-resolved` enabled, and by default it also binds UDP 5353 for its own mDNS stack. When you additionally install `avahi`, both daemons try to share the port and `avahi` ends up publishing only on `lo` — so other machines on your network can't find the sender even
+though it looks fine locally.
+
+Fix by telling `systemd-resolved` to leave mDNS to `avahi`:
+
+```
+sudo mkdir -p /etc/systemd/resolved.conf.d
+sudo tee /etc/systemd/resolved.conf.d/no-mdns.conf > /dev/null <<'EOF'
+[Resolve]
+MulticastDNS=no
+EOF
+
+sudo systemctl restart systemd-resolved
+sudo systemctl restart avahi-daemon
+```
+
+Verify only `avahi-daemon` is on UDP 5353 afterwards:
+
+```
+sudo ss -tulnp | grep 5353
+```
+
+Then restart the sender and confirm it advertises on your LAN interface
+(not just `lo`):
+
+```
+avahi-browse _ndi._tcp -r -t
 ```
 
 
