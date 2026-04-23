@@ -197,3 +197,7 @@ avahi-browse _ndi._tcp -r -t
 ## Credits
 
 API surface inspired by [ofxNDI](https://github.com/leadedge/ofxNDI).
+
+## License
+
+MIT License. See [LICENSE](LICENSE).
