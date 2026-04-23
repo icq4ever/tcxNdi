@@ -1,6 +1,6 @@
 # tcxNdi
 
-NDI (Network Device Interface) send/receive addon for TrussC.
+NDI (Network Device Interface) send/receive addon for [TrussC](http://github.com/trussc-org/trussc).
 
 NDI is a low-latency video-over-IP protocol from Vizrt (formerly NewTek), widely used in broadcast, AV installations, and live streaming.
 
