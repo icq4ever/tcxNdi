@@ -201,7 +201,7 @@ avahi-browse _ndi._tcp -r -t
 - [x] Linux (EndeavourOS / Arch)
 - [ ] Linux (Ubuntu / Debian)
 - [ ] Linux (Raspbian)
-- [ ] Windows
+- [x] Windows (Windows 11 x64)
 - [ ] macOS
 
 ## Credits
