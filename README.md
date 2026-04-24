@@ -25,17 +25,24 @@ Install the `.pkg` from the SDK download. Headers and library land at:
 
 ### Windows
 
-Run the installer. Default install location:
+Run the SDK installer. Default install location:
 
 ```
 C:\Program Files\NDI\NDI 6 SDK\Include\
 C:\Program Files\NDI\NDI 6 SDK\Lib\x64\
-C:\Program Files\NDI\NDI 6 SDK\Bin\x64\
 ```
 
 (The exact `NDI 6 SDK` part follows the SDK version you downloaded.)
 
-`tcxNdi` now looks up both the import library and the runtime DLL from that SDK install and copies the DLL next to your built `.exe`, so you should not need to manually copy `Processing.NDI.Lib.x64.dll`.
+On NDI SDK 6 the runtime DLL is **not** shipped under the SDK's `Bin\x64\` — it comes from a separate **NDI Runtime** installer (also bundled with NDI Tools) and lands at:
+
+```
+C:\Program Files\NDI\NDI 6 Runtime\v6\Processing.NDI.Lib.x64.dll
+```
+
+If your SDK install's `Bin\x64\` is missing `Processing.NDI.Lib.x64.dll`, download **NDI Tools** from https://ndi.video/tools/ (or the standalone NDI Runtime) and install it.
+
+`tcxNdi` probes both the SDK tree and the NDI Runtime tree and copies the DLL next to your built `.exe`, so you should not need to copy `Processing.NDI.Lib.x64.dll` by hand. If both live in non-default locations, set `NDI_SDK_ROOT` to a path that contains either layout.
 
 ### Linux
 

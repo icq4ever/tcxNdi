@@ -28,6 +28,14 @@ elseif(WIN32)
         "C:/Program Files/NDI/NDI*Advanced*SDK"
     )
     list(APPEND _TCX_NDI_HINTS ${_TCX_NDI_WIN_DIRS})
+
+    # The runtime DLL is shipped as a separate "NDI Runtime" installer on
+    # recent SDKs (6.x) and lands under a versioned subfolder (e.g. v6).
+    file(GLOB _TCX_NDI_WIN_RUNTIME_DIRS
+        "C:/Program Files/NDI/NDI*Runtime/v*"
+        "C:/Program Files/NDI/NDI*Runtime"
+    )
+    list(APPEND _TCX_NDI_HINTS ${_TCX_NDI_WIN_RUNTIME_DIRS})
 else()
     list(APPEND _TCX_NDI_HINTS
         "/usr"
@@ -54,10 +62,12 @@ elseif(WIN32)
         HINTS ${_TCX_NDI_HINTS}
         PATH_SUFFIXES Lib/x64
     )
+    # Look in both the SDK layout (Bin/x64) and the standalone Runtime
+    # installer layout (the versioned folder itself contains the DLL).
     find_file(TCX_NDI_RUNTIME_DLL
         NAMES Processing.NDI.Lib.x64.dll
         HINTS ${_TCX_NDI_HINTS}
-        PATH_SUFFIXES Bin/x64
+        PATH_SUFFIXES Bin/x64 .
     )
 else()
     find_library(TCX_NDI_LIBRARY
@@ -80,8 +90,10 @@ if(WIN32 AND NOT TCX_NDI_RUNTIME_DLL)
     message(FATAL_ERROR
         "[tcxNdi] NDI runtime DLL not found.\n"
         "  Expected Processing.NDI.Lib.x64.dll under the SDK's Bin/x64\n"
-        "  directory. Reinstall the NDI SDK or set NDI_SDK_ROOT to the SDK\n"
-        "  install root.\n"
+        "  directory, or under 'C:/Program Files/NDI/NDI * Runtime/v*/'.\n"
+        "  Install the NDI Runtime (bundled with NDI Tools, or a separate\n"
+        "  installer on recent SDKs) or set NDI_SDK_ROOT to point at a tree\n"
+        "  that contains the DLL.\n"
         "  See addons/tcxNdi/README.md for details.")
 endif()
 
