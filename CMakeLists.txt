@@ -54,6 +54,11 @@ elseif(WIN32)
         HINTS ${_TCX_NDI_HINTS}
         PATH_SUFFIXES Lib/x64
     )
+    find_file(TCX_NDI_RUNTIME_DLL
+        NAMES Processing.NDI.Lib.x64.dll
+        HINTS ${_TCX_NDI_HINTS}
+        PATH_SUFFIXES Bin/x64
+    )
 else()
     find_library(TCX_NDI_LIBRARY
         NAMES ndi
@@ -71,8 +76,20 @@ if(NOT TCX_NDI_INCLUDE_DIR OR NOT TCX_NDI_LIBRARY)
         "  See addons/tcxNdi/README.md for details.")
 endif()
 
+if(WIN32 AND NOT TCX_NDI_RUNTIME_DLL)
+    message(FATAL_ERROR
+        "[tcxNdi] NDI runtime DLL not found.\n"
+        "  Expected Processing.NDI.Lib.x64.dll under the SDK's Bin/x64\n"
+        "  directory. Reinstall the NDI SDK or set NDI_SDK_ROOT to the SDK\n"
+        "  install root.\n"
+        "  See addons/tcxNdi/README.md for details.")
+endif()
+
 message(STATUS "[tcxNdi]   include : ${TCX_NDI_INCLUDE_DIR}")
 message(STATUS "[tcxNdi]   library : ${TCX_NDI_LIBRARY}")
+if(WIN32)
+    message(STATUS "[tcxNdi]   runtime : ${TCX_NDI_RUNTIME_DLL}")
+endif()
 
 # =============================================================================
 # Library target
@@ -93,5 +110,17 @@ target_link_libraries(tcxNdi
         TrussC
         "${TCX_NDI_LIBRARY}"
 )
+
+if(WIN32)
+    # TrussC Windows apps place the executable in <project>/bin, so keep the
+    # NDI runtime next to the final .exe without changing core build logic.
+    add_custom_command(TARGET tcxNdi POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/bin"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${TCX_NDI_RUNTIME_DLL}"
+            "${CMAKE_SOURCE_DIR}/bin/Processing.NDI.Lib.x64.dll"
+        COMMENT "[tcxNdi] Copying NDI runtime DLL to ${CMAKE_SOURCE_DIR}/bin"
+    )
+endif()
 
 message(STATUS "[tcxNdi] Addon loaded")

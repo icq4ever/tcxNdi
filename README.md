@@ -30,9 +30,12 @@ Run the installer. Default install location:
 ```
 C:\Program Files\NDI\NDI 6 SDK\Include\
 C:\Program Files\NDI\NDI 6 SDK\Lib\x64\
+C:\Program Files\NDI\NDI 6 SDK\Bin\x64\
 ```
 
 (The exact `NDI 6 SDK` part follows the SDK version you downloaded.)
+
+`tcxNdi` now looks up both the import library and the runtime DLL from that SDK install and copies the DLL next to your built `.exe`, so you should not need to manually copy `Processing.NDI.Lib.x64.dll`.
 
 ### Linux
 
